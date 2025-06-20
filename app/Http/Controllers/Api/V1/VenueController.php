@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Venue;
+use Illuminate\Support\Facades\Cache;
 
 class VenueController extends Controller
 {
@@ -13,7 +14,10 @@ class VenueController extends Controller
      */
     public function index()
     {
-        $venues = Venue::all();
+        $venues = Cache::remember('venues', 24 * 60 * 60, function () {
+            return Venue::all();
+        });
+
         if ($venues->isEmpty()) {
             return response()->json(['message' => 'No venues found'], 404);
         }
